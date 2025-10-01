@@ -14,13 +14,13 @@ let tire_dir=-90;
 let v=0;
 let c_fric = 0.03;
 
-let car_width = 10;
-let car_length = 20;
+let car_width = 20;
+let car_length = 40;
 let car_phi;
 let car_r;
-let tire_width = 2;
-let tire_diam = 4;
-let tire_to_car_center_distance = 6;
+let tire_width = 5;
+let tire_diam = 10;
+let tire_to_car_center_distance = 10;
 let car_tire_r;
 let car_tire_phi;
 let tire_r;
@@ -35,30 +35,25 @@ function setup() {
   y = height / 2;
   angleMode(DEGREES);
   car_phi = atan(car_width/car_length);
-    car_r = sqrt(sq(car_width) + sq(car_length))/2;
-    car_tire_r = sqrt(sq((tire_width+car_width)/2)+sq(tire_to_car_center_distance));
-    car_tire_phi = atan((tire_width+car_width)/(2*tire_to_car_center_distance));
-    tire_r = sqrt(sq(tire_diam) + sq(tire_width))/2;
-    tire_phi = atan(tire_width/tire_diam);
+  car_r = sqrt(sq(car_width) + sq(car_length))/2;
+  car_tire_r = sqrt(sq((tire_width+car_width)/2)+sq(tire_to_car_center_distance));
+  car_tire_phi = atan((tire_width+car_width)/(2*tire_to_car_center_distance));
+  tire_r = sqrt(sq(tire_diam) + sq(tire_width))/2;
+  tire_phi = atan(tire_width/tire_diam);
 }
 
 function keyInput() {
   if (keyIsDown(87) === true) {
     v+=a;
   }
-
-
-
   if (keyIsDown(83) === true) {
     v -= a;
   }
   if (keyIsDown(68) === true) {
     tire_dir+=ang_a;
-
   }
   if (keyIsDown(65) === true) {
     tire_dir-= ang_a;
-
   }
 }
 
@@ -82,23 +77,25 @@ function draw_racecar() {
   x4 = x + car_r*cos(car_dir+car_phi+180);
   y4 = y + car_r*sin(car_dir+car_phi+180);
   
+  // draw tires
+  fill("black");
+  let angles = [90-car_tire_phi, 90+car_tire_phi, -90-car_tire_phi, -90+car_tire_phi];
+  for (let i=0; i<4; i++) {
+    draw_tire(angles[i]);
+  }
+  
   // draw car body
   fill("blue");
   quad(x1,y1,x2,y2,x3,y3,x4,y4);
   fill("red");
   quad(x1,y1,x2,y2,(4*x2+x3)/5,(4*y2+y3)/5, (4*x1+x4)/5, (4*y1+y4)/5);
-  // draw tires
-  fill("black");
-  let angles = [90-car]
-  for (let i=0; i<4; i++) {
-    draw_tire();
-  }
+
 
 }
 
 function draw_tire(angle) {
-  let x_center = car_tire_r*cos(90-car_tire_phi+car_dir)+x;
-  let y_center = car_tire_r*sin(90-car_tire_phi+car_dir)+y;
+  let x_center = car_tire_r*cos(angle+car_dir)+x;
+  let y_center = car_tire_r*sin(angle+car_dir)+y;
   // circle(x_center,y_center, 2);
   quad(x_center + tire_r*cos(90-tire_phi+tire_dir),y_center + tire_r*sin(90-tire_phi+tire_dir), x_center + tire_r*cos(90+tire_phi+tire_dir),y_center + tire_r*sin(90+tire_phi+tire_dir), x_center + tire_r*cos(-90-tire_phi+tire_dir),y_center + tire_r*sin(-90-tire_phi+tire_dir), x_center + tire_r*cos(-90+tire_phi+tire_dir),y_center + tire_r*sin(-90+tire_phi+tire_dir));
 
