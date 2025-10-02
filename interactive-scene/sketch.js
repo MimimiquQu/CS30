@@ -15,7 +15,7 @@ let a = 0.2;
 let ang_a = 1;
 let c_r = 0.8;
 let car_dir=-90;
-let tire_dir=-90;
+let tire_dir=0;
 let v=0;
 let c_fric = 0.03;
 
