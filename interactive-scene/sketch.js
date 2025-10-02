@@ -7,9 +7,6 @@
 // - describe what you did to take this project "above and beyond"
 
 
-
-
-
 let x = 0;
 let y = 0;
 let dx = 0;
@@ -55,7 +52,7 @@ function keyInput() {
     v+=a;
   }
   if (keyIsDown(83) === true) {
-    v -= a;
+    v-=a;
   }
   if (keyIsDown(68) === true) {
     tire_dir+=ang_a;
@@ -68,8 +65,6 @@ function keyInput() {
 function draw() {
   background(255);
   keyInput();
-  // x += v*cos(car_dir);
-  // y += v*sin(car_dir);
   draw_racecar();
   edge_collision();
   
@@ -104,7 +99,6 @@ function draw_racecar() {
 function draw_tire(angle) {
   let x_center = car_tire_r*cos(angle+car_dir)+x;
   let y_center = car_tire_r*sin(angle+car_dir)+y;
-  // circle(x_center,y_center, 2);
   quad(x_center + tire_r*cos(90-tire_phi+tire_dir),y_center + tire_r*sin(90-tire_phi+tire_dir), x_center + tire_r*cos(90+tire_phi+tire_dir),y_center + tire_r*sin(90+tire_phi+tire_dir), x_center + tire_r*cos(-90-tire_phi+tire_dir),y_center + tire_r*sin(-90-tire_phi+tire_dir), x_center + tire_r*cos(-90+tire_phi+tire_dir),y_center + tire_r*sin(-90+tire_phi+tire_dir));
 
 }
