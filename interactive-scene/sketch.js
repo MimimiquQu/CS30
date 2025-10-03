@@ -1,24 +1,34 @@
 // Racecar Game Project
 // Tschumi Qu
 // 09/29/2025
-// Date
+
 
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
 
+// global variables to track car position, velocity, acceleration, direction, tire angle, throttle, brake, steering
 let x = 0;
 let y = 0;
 let dx = 0;
 let dy = 0;
 let a = 0.2;
-let ang_a = 1;
-let c_r = 0.8;
-let car_dir=-90;
-let tire_dir=0;
 let v=0;
-let c_fric = 0.03;
+let c_r = 0.8;
+let car_dir = 90;
+let tire_dir = 0;
+let steering_angle = tire_phi - car_phi;
+let throttle = 0;
+let brake = 0;
 
+// constants for car movement, friction, etc.
+let a_max = 5;
+let b_max = -5;
+let drag_coeff = 0.05;
+let rr_coeff = 0.01;
+let steering_rate = 5;
+
+// Car/tires dimensions constants
 let car_width = 20;
 let car_length = 40;
 let car_phi;
@@ -30,6 +40,8 @@ let car_tire_r;
 let car_tire_phi;
 let tire_r;
 let tire_phi;
+
+// global variables to draw the car.
 let x1,x2,x3,x4,y1,y2,y3,y4;
 
 
@@ -49,22 +61,25 @@ function setup() {
 
 function keyInput() {
   if (keyIsDown(87) === true) {
-    v+=a;
+    if (throttle<= 0.9) throttle += 0.1;
+    a = throttle*a_max;
   }
   if (keyIsDown(83) === true) {
-    v-=a;
+    if (brake<= 0.9) brake += 0.1;
+    a = -brake*b_max;
   }
   if (keyIsDown(68) === true) {
-    tire_dir+=ang_a;
+    tire_dir+=steering_rate;
   }
   if (keyIsDown(65) === true) {
-    tire_dir-= ang_a;
+    tire_dir-= steering_rate;;
   }
 }
 
 function draw() {
   background(255);
   keyInput();
+  v+=a;
   draw_racecar();
   edge_collision();
   
