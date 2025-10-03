@@ -65,8 +65,10 @@ function setup() {
 
 function keyInput() {
   if (keyIsDown(82) === true) {
-    gear *= -1;
-  }
+    gear = -1;
+  } else {
+    gear = 1;
+  } 
   if (keyIsDown(87) === true) {
     brake = 0;
     if (throttle<= 0.9) throttle += 0.2;
@@ -130,7 +132,7 @@ function move_car() {
   // F=ma; the external forces present are throttle/brake, drag (pp to v^2), and rolling friction (pp to v)
   a = throttle*a_max*gear - brake*b_max*gear;
   // v = a*dt
-  if (v+a>=0) {
+  if ((v+a)*gear>=0) {
     v+=a;
   } else {
     v=0;
