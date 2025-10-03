@@ -21,12 +21,13 @@ let tire_r;
 let tire_phi;
 
 // constants for car movement, friction, etc.
-let a_max = 5;
-let b_max = -5;
+let a_max = 0.2;
+let b_max = 0.2;
 let drag_coeff = 0.05;
 let rr_coeff = 0.01;
 let steering_rate = 1;
 let steering_angle_max = 40;
+let steering_factor = 5;
 
 // global variables to track car position, velocity, acceleration, direction, tire angle, throttle, brake, steering
 let x = 0;
@@ -35,12 +36,14 @@ let dx = 0;
 let dy = 0;
 let a = 0;
 let v = 0;
-let c_r = 0.8;
+let c_r = 1;
 let car_dir = 0;
 let tire_dir = 0;
 let steering_angle = tire_phi - car_phi;
 let throttle = 0;
 let brake = 0;
+// the direction variable is used to track whether the car is going forward or backward
+let gear = 1;
 
 // global variables to draw the car.
 let x1,x2,x3,x4,y1,y2,y3,y4;
@@ -61,26 +64,31 @@ function setup() {
 }
 
 function keyInput() {
+  if (keyIsDown(82) === true) {
+    gear *= -1;
+  }
   if (keyIsDown(87) === true) {
     brake = 0;
-    if (throttle<= 0.9) throttle += 0.1;
+    if (throttle<= 0.9) throttle += 0.2;
   }
   if (keyIsDown(83) === true) {
     throttle = 0;
-    if (brake<= 0.9) brake += 0.1;
+    if (brake<= 0.9) brake += 0.2;
   }
   if (keyIsDown(68) === true) {
     if (steering_angle <= steering_angle_max - steering_rate) tire_dir+=steering_rate;
   }
   if (keyIsDown(65) === true) {
-    if (steering_angle <= -steering_angle_max + steering_rate) tire_dir-=steering_rate;
-    tire_dir-= steering_rate;
+    if (steering_angle >= -steering_angle_max + steering_rate) tire_dir-=steering_rate;
   }
+  if (throttle>=0.1) throttle-=0.1;
+  if (brake>=0.1) brake-=0.1;
 }
 
 function draw() {
   background(255);
   keyInput();
+  console.log(a);
   move_car();
   draw_racecar();
   edge_collision();
@@ -120,16 +128,19 @@ function move_car() {
   // update the steering angle
   steering_angle = tire_dir - car_dir;
   // F=ma; the external forces present are throttle/brake, drag (pp to v^2), and rolling friction (pp to v)
-  a = throttle*a_max - brake*b_max - drag_coeff*sq(v) - rr_coeff*v;
+  a = throttle*a_max*gear - brake*b_max*gear;
   // v = a*dt
-  v += a;
+  if (v+a>=0) {
+    v+=a;
+  } else {
+    v=0;
+  }
 
   // Implement Turning
   // The turning radius R can be calculated as R=L/tan(steering_angle) with simple geometry, since by the rolling without slipping condition, the instantaneous center of turning must be the intersection of the perpendicular bisectors of the tires(front axle) and the car body.
   // turning the car based on this calculation:
-  car_dir += (v/tire_to_car_center_distance)*tan(steering_angle);
-  tire_dir += (v/tire_to_car_center_distance)*tan(steering_angle);
-  console.log(v);
+  car_dir += (v/tire_to_car_center_distance)*tan(steering_angle)*steering_factor;
+  tire_dir += (v/tire_to_car_center_distance)*tan(steering_angle)*steering_factor;
   // update the position of the car
   x += v*cos(car_dir);
   y += v*sin(car_dir);
