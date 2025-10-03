@@ -20,26 +20,27 @@ let car_tire_phi;
 let tire_r;
 let tire_phi;
 
-// global variables to track car position, velocity, acceleration, direction, tire angle, throttle, brake, steering
-let x = 0;
-let y = 0;
-let dx = 0;
-let dy = 0;
-let a = 0.2;
-let v=0;
-let c_r = 0.8;
-let car_dir = 0;
-let tire_dir = 0;
-let steering_angle = tire_phi - car_phi;
-let throttle = 0;
-let brake = 0;
-
 // constants for car movement, friction, etc.
 let a_max = 5;
 let b_max = -5;
 let drag_coeff = 0.05;
 let rr_coeff = 0.01;
 let steering_rate = 1;
+let steering_angle_max = 40;
+
+// global variables to track car position, velocity, acceleration, direction, tire angle, throttle, brake, steering
+let x = 0;
+let y = 0;
+let dx = 0;
+let dy = 0;
+let a = 0;
+let v = 0;
+let c_r = 0.8;
+let car_dir = 0;
+let tire_dir = 0;
+let steering_angle = tire_phi - car_phi;
+let throttle = 0;
+let brake = 0;
 
 // global variables to draw the car.
 let x1,x2,x3,x4,y1,y2,y3,y4;
@@ -63,29 +64,26 @@ function keyInput() {
   if (keyIsDown(87) === true) {
     brake = 0;
     if (throttle<= 0.9) throttle += 0.1;
-    a = throttle*a_max;
   }
   if (keyIsDown(83) === true) {
     throttle = 0;
     if (brake<= 0.9) brake += 0.1;
-    a = -brake*b_max;
   }
   if (keyIsDown(68) === true) {
-    tire_dir+=steering_rate;
+    if (steering_angle <= steering_angle_max - steering_rate) tire_dir+=steering_rate;
   }
   if (keyIsDown(65) === true) {
-    tire_dir-= steering_rate;;
+    if (steering_angle <= -steering_angle_max + steering_rate) tire_dir-=steering_rate;
+    tire_dir-= steering_rate;
   }
 }
 
 function draw() {
   background(255);
   keyInput();
-  v+=a;
-  turn_car();
+  move_car();
   draw_racecar();
   edge_collision();
-  
 }
 
 function draw_racecar() {
@@ -97,7 +95,7 @@ function draw_racecar() {
   y3 = y + car_r*sin(car_dir-car_phi+180);
   x4 = x + car_r*cos(car_dir+car_phi+180);
   y4 = y + car_r*sin(car_dir+car_phi+180);
-  
+
   // draw tires
   fill("black");
   let angles = [car_tire_phi, -car_tire_phi, 180+car_tire_phi,180-car_tire_phi];
@@ -110,20 +108,33 @@ function draw_racecar() {
   quad(x1,y1,x2,y2,x3,y3,x4,y4);
   fill("red");
   quad(x1,y1,x2,y2,(4*x2+x3)/5,(4*y2+y3)/5, (4*x1+x4)/5, (4*y1+y4)/5);
-
-
 }
 
 function draw_tire(angle) {
   let x_center = car_tire_r*cos(angle+car_dir)+x;
   let y_center = car_tire_r*sin(angle+car_dir)+y;
   quad(x_center + tire_r*sin(90-tire_phi-tire_dir),y_center + tire_r*cos(90-tire_phi-tire_dir), x_center + tire_r*sin(90+tire_phi-tire_dir),y_center + tire_r*cos(90+tire_phi-tire_dir), x_center + tire_r*sin(-90-tire_phi-tire_dir),y_center + tire_r*cos(-90-tire_phi-tire_dir), x_center + tire_r*sin(-90+tire_phi-tire_dir),y_center + tire_r*cos(-90+tire_phi-tire_dir));
-
 }
 
-function turn_car() {
+function move_car() {
+  // update the steering angle
+  steering_angle = tire_dir - car_dir;
+  // F=ma; the external forces present are throttle/brake, drag (pp to v^2), and rolling friction (pp to v)
+  a = throttle*a_max - brake*b_max - drag_coeff*sq(v) - rr_coeff*v;
+  // v = a*dt
+  v += a;
 
+  // Implement Turning
+  // The turning radius R can be calculated as R=L/tan(steering_angle) with simple geometry, since by the rolling without slipping condition, the instantaneous center of turning must be the intersection of the perpendicular bisectors of the tires(front axle) and the car body.
+  // turning the car based on this calculation:
+  car_dir += (v/tire_to_car_center_distance)*tan(steering_angle);
+  tire_dir += (v/tire_to_car_center_distance)*tan(steering_angle);
+  console.log(v);
+  // update the position of the car
+  x += v*cos(car_dir);
+  y += v*sin(car_dir);
 }
+
 function edge_collision() {
   if (min(x1,x2,x3,x4)<=0 || max(x1,x2,x3,x4)>=width) {
     v = -v*c_r;
