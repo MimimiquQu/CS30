@@ -56,9 +56,12 @@ let gear = 1;
 // global variables to draw the car.
 let x1,x2,x3,x4,y1,y2,y3,y4;
 
+// state variables
+let game_state = "start_screen";
 
 function preload() {
   track_img = loadImage('racecar_map.png');
+  start_screen = loadImage('start_screen.png');
 }
 
 function setup() {
@@ -77,14 +80,45 @@ function setup() {
 
 // draw loop
 function draw() {
-  background(220);
-  keyInput();
-  move_car();
-  camera_pan();
-  // edge_collision();
+  if (game_state === "start_screen") {
+    start_screen_display();
+  }
+  if (game_state === "playing") {
+    background(220);
+    keyInput();
+    move_car();
+    camera_pan();
+    // edge_collision();
+  }
 
 }
 
+function start_screen_display() {
+  image(start_screen, 0, 0, width, height);
+  //  draw "start game" button
+  fill("yellow");
+  rect(4/5*width-100, 4/5*height-50, 200, 100);
+
+  textAlign(CENTER, CENTER);
+  textSize(40);
+  fill("black");
+  text("START", 4/5*width, 4/5*height);
+  fill("white");
+  textSize(20);
+  textAlign(LEFT, CENTER);
+  text("Controls:", width/20, height/2);
+  text("W/S for gas/brake", width/20, height/2+50);
+  text("A/D for steering", width/20, height/2+100);
+  text("Hold R for reverse gear (Car must be at rest!)", width/20, height/2+150);
+  textSize(40);
+  fill("red");
+  textAlign(CENTER, CENTER);
+  text("COLLISIONS DO NOT EXIST!!!(YET)", width/2, height/15);
+
+  if (mouseIsPressed && mouseX>4/5*width-100 && mouseX<4/5*width+100 && mouseY>4/5*height-50 && mouseY<4/5*height+50) {
+    game_state = "playing";
+  }
+}
 
 function keyInput() {
   // hold "r" to switch to reverse gear
