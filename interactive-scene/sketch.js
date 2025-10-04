@@ -6,8 +6,12 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+// load sprites
+let track_img;
+let start_screen;
 
-// Car/tires dimensions constants
+// Map/Car/tires dimensions constants
+let map_scaling = 2;
 let car_width = 20;
 let car_length = 40;
 let car_phi;
@@ -23,11 +27,13 @@ let tire_phi;
 // constants for car movement, friction, etc.
 let a_max = 0.2;
 let b_max = 0.2;
-let drag_coeff = 0.002;
-let rr_coeff = 0.003;
+let drag_coeff = 0.0002;
+let rr_coeff = 0.00005;
 let steering_rate = 1;
 let steering_angle_max = 40;
 let steering_factor = 3;
+// static friction is proportional to v^2*tan(steering_angle), so we set a constant to limit this MAXIMUM of this quantity.
+let fric_max = 10;
 
 // global variables to track car position, velocity, acceleration, direction, tire angle, throttle, brake, steering
 let x = 0;
@@ -37,11 +43,13 @@ let dy = 0;
 let a = 0;
 let v = 0;
 let c_r = 1;
-let car_dir = 0;
-let tire_dir = 0;
+let car_dir = -90;
+let tire_dir = -90;
 let steering_angle = tire_phi - car_phi;
 let throttle = 0;
 let brake = 0;
+let fric;
+let turning_radius;
 // the direction variable is used to track whether the car is going forward or backward
 let gear = 1;
 
@@ -49,11 +57,15 @@ let gear = 1;
 let x1,x2,x3,x4,y1,y2,y3,y4;
 
 
+function preload() {
+  track_img = loadImage('racecar_map.png');
+}
+
 function setup() {
   createCanvas(700, 700);
   noStroke();
-  x = width / 2;
-  y = height / 2;
+  x = 800;
+  y = 800;
   angleMode(DEGREES);
   car_phi = atan(car_width/car_length);
   car_r = sqrt(sq(car_width) + sq(car_length))/2;
@@ -62,6 +74,17 @@ function setup() {
   tire_r = sqrt(sq(tire_diam) + sq(tire_width))/2;
   tire_phi = atan(tire_width/tire_diam);
 }
+
+// draw loop
+function draw() {
+  background(220);
+  keyInput();
+  move_car();
+  camera_pan();
+  // edge_collision();
+
+}
+
 
 function keyInput() {
   // hold "r" to switch to reverse gear
@@ -88,15 +111,28 @@ function keyInput() {
   if (brake>=0.1) brake-=0.025;
 }
 
-function draw() {
-  background(200);
-  keyInput();
-  console.log(a);
-  move_car();
-  draw_racecar();
-  edge_collision();
-}
 
+function camera_pan() {
+  push();
+  // set "camera" to the center of canvas, and rotate the entire canvas.
+  translate(width/2, height/2);
+  rotate(-car_dir-90);
+  // translate so the car is at origin
+  translate(-x, -y);
+  // draw the map
+  image(track_img, -width/2, -height/2, track_img.width*map_scaling, track_img.height*map_scaling);
+
+  // draw the car with a separate push/pop pair so that when we rotate the car back to -90, it doesn't rotate the canvas altogether
+  push();
+  // set camera back to center and rotate the car
+  translate(x, y);
+  // rotate(car_dir+90);
+  translate(-x,-y);
+  draw_racecar();
+  pop();
+
+  pop();
+}
 function draw_racecar() {
   x1 = x + car_r*cos(car_dir-car_phi);
   y1 = y + car_r*sin(car_dir-car_phi);
@@ -142,18 +178,20 @@ function move_car() {
   // Implement Turning
   // The turning radius R can be calculated as R=L/tan(steering_angle) with simple geometry, since by the rolling without slipping condition, the instantaneous center of turning must be the intersection of the perpendicular bisectors of the tires(front axle) and the car body.
   // turning the car based on this calculation:
-  car_dir += (v/tire_to_car_center_distance)*tan(steering_angle)*steering_factor*1.5;
-  tire_dir += (v/tire_to_car_center_distance)*tan(steering_angle)*steering_factor;
+  // I wanted to implement a Maximal Friction condition, but it doesn't seem to work well and makes the car behave very wierdly, so I'm commenting it out tfor now.
+  // fric = sq(v)*tan(steering_angle);
+  // if (abs(fric)>fric_max) {
+  //   turning_radius = sq(v)/fric_max * (steering_angle>0 ? 1 : -1); // the last part with the "? :" is for checking what sign should turning_radius be. Theoretically, it's a positive number by definition, but here we're using it kind of like a vector.
+  // } else {
+  //   turning_radius = tire_to_car_center_distance/tan(steering_angle);
+  // }
+
+  turning_radius = tire_to_car_center_distance/tan(steering_angle);
+
+  car_dir += v/turning_radius*steering_factor*1.5;
+  tire_dir += v/turning_radius*steering_factor;
   // update the position of the car
   x += v*cos(car_dir);
   y += v*sin(car_dir);
 }
 
-function edge_collision() {
-  if (min(x1,x2,x3,x4)<=0 || max(x1,x2,x3,x4)>=width) {
-    v = -v*c_r;
-  }
-  if (min(y1,y2,y3,y4)<=0 || max(y1,y2,y3,y4)>=height) {
-    v = -v*c_r;
-  }
-}
