@@ -4,7 +4,7 @@
 
 
 // Extra for Experts:
-// - describe what you did to take this project "above and beyond"
+// See Google Docs :)
 
 // load sprites
 let track_img;
@@ -66,10 +66,13 @@ function preload() {
 
 // resize canvas
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
   // scale everything in the game accordingly
   let scale_vector = createVector(width/windowWidth, height/windowHeight);
+  resizeCanvas(windowWidth, windowHeight);
+  translate(width/2, height/2);
   scale(v);
+  translate(-width/2, -height/2);
+  
 }
 
 // setup canvas and initialize variables and whatnot
