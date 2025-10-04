@@ -31,7 +31,7 @@ let drag_coeff = 0.0002;
 let rr_coeff = 0.00005;
 let steering_rate = 1;
 let steering_angle_max = 40;
-let steering_factor = 3;
+let steering_factor = 2;
 // static friction is proportional to v^2*tan(steering_angle), so we set a constant to limit this MAXIMUM of this quantity.
 let fric_max = 10;
 
@@ -64,11 +64,20 @@ function preload() {
   start_screen = loadImage('start_screen.png');
 }
 
+// resize canvas
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  // scale everything in the game accordingly
+  let scale_vector = createVector(width/windowWidth, height/windowHeight);
+  scale(v);
+}
+
+// setup canvas and initialize variables and whatnot
 function setup() {
-  createCanvas(700, 700);
+  createCanvas(windowWidth, windowHeight);
   noStroke();
-  x = 800;
-  y = 800;
+  x = width/2;
+  y = height/2;
   angleMode(DEGREES);
   car_phi = atan(car_width/car_length);
   car_r = sqrt(sq(car_width) + sq(car_length))/2;
