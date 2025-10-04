@@ -23,8 +23,8 @@ let tire_phi;
 // constants for car movement, friction, etc.
 let a_max = 0.2;
 let b_max = 0.2;
-let drag_coeff = 0.05;
-let rr_coeff = 0.01;
+let drag_coeff = 0.002;
+let rr_coeff = 0.003;
 let steering_rate = 1;
 let steering_angle_max = 40;
 let steering_factor = 3;
@@ -50,7 +50,7 @@ let x1,x2,x3,x4,y1,y2,y3,y4;
 
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(700, 700);
   noStroke();
   x = width / 2;
   y = height / 2;
@@ -89,7 +89,7 @@ function keyInput() {
 }
 
 function draw() {
-  background(255);
+  background(200);
   keyInput();
   console.log(a);
   move_car();
@@ -131,7 +131,7 @@ function move_car() {
   // update the steering angle
   steering_angle = tire_dir - car_dir;
   // F=ma; the external forces present are throttle/brake, drag (pp to v^2), and rolling friction (pp to v)
-  a = throttle*a_max*gear - brake*b_max*gear;
+  a = throttle*a_max*gear - brake*b_max*gear-drag_coeff*v*abs(v) -rr_coeff*v;
   // v = a*dt
   if ((v+a)*gear>=0) {
     v+=a;
