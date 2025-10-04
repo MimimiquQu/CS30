@@ -31,7 +31,7 @@ let drag_coeff = 0.0002;
 let rr_coeff = 0.00005;
 let steering_rate = 1;
 let steering_angle_max = 40;
-let steering_factor = 2;
+let steering_factor = 2.5;
 // static friction is proportional to v^2*tan(steering_angle), so we set a constant to limit this MAXIMUM of this quantity.
 let fric_max = 10;
 
