@@ -27,7 +27,7 @@ let drag_coeff = 0.05;
 let rr_coeff = 0.01;
 let steering_rate = 1;
 let steering_angle_max = 40;
-let steering_factor = 5;
+let steering_factor = 3;
 
 // global variables to track car position, velocity, acceleration, direction, tire angle, throttle, brake, steering
 let x = 0;
@@ -64,18 +64,19 @@ function setup() {
 }
 
 function keyInput() {
-  if (keyIsDown(82) === true) {
+  // hold "r" to switch to reverse gear
+  if (keyIsDown(82) === true && v<=0.1 || v<=-0.1) {
     gear = -1;
   } else {
     gear = 1;
   } 
   if (keyIsDown(87) === true) {
     brake = 0;
-    if (throttle<= 0.9) throttle += 0.2;
+    if (throttle<= 0.975) throttle += 0.05;
   }
   if (keyIsDown(83) === true) {
     throttle = 0;
-    if (brake<= 0.9) brake += 0.2;
+    if (brake<= 0.975) brake += 0.05;
   }
   if (keyIsDown(68) === true) {
     if (steering_angle <= steering_angle_max - steering_rate) tire_dir+=steering_rate;
@@ -83,8 +84,8 @@ function keyInput() {
   if (keyIsDown(65) === true) {
     if (steering_angle >= -steering_angle_max + steering_rate) tire_dir-=steering_rate;
   }
-  if (throttle>=0.1) throttle-=0.1;
-  if (brake>=0.1) brake-=0.1;
+  if (throttle>=0.1) throttle-=0.025;
+  if (brake>=0.1) brake-=0.025;
 }
 
 function draw() {
@@ -141,7 +142,7 @@ function move_car() {
   // Implement Turning
   // The turning radius R can be calculated as R=L/tan(steering_angle) with simple geometry, since by the rolling without slipping condition, the instantaneous center of turning must be the intersection of the perpendicular bisectors of the tires(front axle) and the car body.
   // turning the car based on this calculation:
-  car_dir += (v/tire_to_car_center_distance)*tan(steering_angle)*steering_factor;
+  car_dir += (v/tire_to_car_center_distance)*tan(steering_angle)*steering_factor*1.5;
   tire_dir += (v/tire_to_car_center_distance)*tan(steering_angle)*steering_factor;
   // update the position of the car
   x += v*cos(car_dir);
