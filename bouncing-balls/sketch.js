@@ -3,10 +3,11 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   spawnBall();
   noStroke();
+  angleMode(DEGREES);
 }
 
 function draw() {
-  background("red");
+  background(255);
   moveCircle();
   checkCollisions();
   bounceEdge();
@@ -68,12 +69,17 @@ function checkCollisions() {
     for (let j=i+1; j<theBallArray.length; j++) {
       let ball2 = theBallArray[j];
       let d = dist(ball1.x, ball1.y, ball2.x, ball2.y);
-      if (d < ball1.radius + ball2.radius) {
-        //collision!
-        ball1.dx = ball1.dx * -1;
-        ball1.dy = ball1.dy * -1;
-        ball2.dx = ball2.dx * -1;
-        ball2.dy = ball2.dy * -1;
+      if (d <= ball1.radius + ball2.radius) {
+        // collides perfectly elastically, along the normal
+        let normal = createVector(ball2.x-ball1.x, ball2.y-ball1.y);
+        normal.normalize();
+        let tangent = p5.Vector.rotate(normal, 90);
+        // model 1d perfectly elastic collision along the normal
+        
+
+
+
+
         randomizeColor(ball1);
         randomizeColor(ball2);
       }

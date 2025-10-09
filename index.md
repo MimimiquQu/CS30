@@ -6,3 +6,4 @@
 
 ## Assignments
 - [Interactive Scene](interactive-scene)
+- [Generative Art](generative-art)
