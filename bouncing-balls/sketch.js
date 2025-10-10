@@ -80,8 +80,8 @@ function checkCollisions() {
         v1.add(normal.mult(v2.dot(normal)-v1.dot(normal)));
         v2.add(normal.mult(v1.dot(normal)-v2.dot(normal)));
 
-        randomizeColor(ball1);
-        randomizeColor(ball2);
+        // randomizeColor(ball1);
+        // randomizeColor(ball2);
       }
     }
   }
