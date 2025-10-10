@@ -74,11 +74,11 @@ function checkCollisions() {
         let normal = createVector(ball2.x-ball1.x, ball2.y-ball1.y);
         normal.normalize();
         let tangent = p5.Vector.rotate(normal, 90);
+        let v1 = createVector(ball1.dx, ball1.dy);
+        let v2 = createVector(ball2.dx, ball2.dy);
         // model 1d perfectly elastic collision along the normal
-        
-
-
-
+        v1.add(normal.mult(v2.dot(normal)-v1.dot(normal)));
+        v2.add(normal.mult(v1.dot(normal)-v2.dot(normal)));
 
         randomizeColor(ball1);
         randomizeColor(ball2);
