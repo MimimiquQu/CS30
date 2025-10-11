@@ -162,7 +162,7 @@ function camera_pan() {
   push();
   // set "camera" to the center of canvas, and rotate the entire canvas.
   translate(width/2, height/2);
-  rotate(-car_dir-90);
+
   // translate so the car is at origin
   translate(-x, -y);
   // draw the map
@@ -234,7 +234,7 @@ function move_car() {
 
   turning_radius = tire_to_car_center_distance/tan(steering_angle);
 
-  car_dir += v/turning_radius*steering_factor*1.5;
+  car_dir += v/turning_radius*steering_factor;
   tire_dir += v/turning_radius*steering_factor;
   // update the position of the car
   x += v*cos(car_dir);
