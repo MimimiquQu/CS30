@@ -70,22 +70,27 @@ function checkCollisions() {
       let ball2 = theBallArray[j];
       let d = dist(ball1.x, ball1.y, ball2.x, ball2.y);
       if (d <= ball1.radius + ball2.radius) {
+        // correct overlap
+        let overlap = ball1.radius+ball2.radius-d;
+        
         // collides perfectly elastically, along the normal
         let normal = createVector(ball2.x-ball1.x, ball2.y-ball1.y);
         normal.normalize();
         let v1 = createVector(ball1.dx, ball1.dy);
         let v2 = createVector(ball2.dx, ball2.dy);
+        let v1Change = normal.copy();
+        let v2Change = normal.copy();
         // model 1d collision
-        let v1Change = normal.mult(v2.dot(normal)-v1.dot(normal));
-        let v2Change = normal.mult(v1.dot(normal)-v2.dot(normal));
+        v1Change.mult(v2.dot(normal)-v1.dot(normal));
+        v2Change.mult(v1.dot(normal)-v2.dot(normal));
         v1.add(v1Change);
         v2.add(v2Change);
         ball1.dx = v1.x;
         ball1.dy = v1.y;
         ball2.dx = v2.x;
         ball2.dy = v2.y;
-        // randomizeColor(ball1);
-        // randomizeColor(ball2);
+        randomizeColor(ball1);
+        randomizeColor(ball2);
       }
     }
   }
