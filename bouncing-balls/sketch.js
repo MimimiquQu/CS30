@@ -76,10 +76,10 @@ function checkCollisions() {
         let v1 = createVector(ball1.dx, ball1.dy);
         let v2 = createVector(ball2.dx, ball2.dy);
         // model 1d collision
-        let dv1 = normal.mult(v2.dot(normal)-v1.dot(normal));
-        let dv2 = normal.mult(v1.dot(normal)-v2.dot(normal));
-        v1.add(dv1);
-        v2.add(dv2);
+        let v1Change = normal.mult(v2.dot(normal)-v1.dot(normal));
+        let v2Change = normal.mult(v1.dot(normal)-v2.dot(normal));
+        v1.add(v1Change);
+        v2.add(v2Change);
         ball1.dx = v1.x;
         ball1.dy = v1.y;
         ball2.dx = v2.x;
