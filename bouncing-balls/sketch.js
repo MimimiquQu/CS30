@@ -1,10 +1,14 @@
 let theBallArray = [];
 let maxSpeed = 6;
+let distributionWidth = 0.5;
+let colorDistributionMidpoint;
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   spawnBall();
   noStroke();
   angleMode(DEGREES);
+  colorDistributionMidpoint = (-1)*distributionWidth*log((1+exp((-1)/distributionWidth))/2);
 }
 
 function draw() {
@@ -113,8 +117,8 @@ function showCircle() {
     let theBall = theBallArray[i];
     // the kinetic energy of the ball
     let ballKE = (sq(theBall.dx)+sq(theBall.dy))/(2*sq(maxSpeed));
-    theBall.r = max(0,2*ballKE - 1)*255;
-    theBall.b = max(0,1-2*ballKE)*255;
+    theBall.r = min(1,4*ballKE)*255;
+    theBall.b = max(0,1-4*ballKE)*255;
     fill(theBall.r, theBall.g, theBall.b);
     circle(theBall.x, theBall.y, theBall.radius*2)
   }
