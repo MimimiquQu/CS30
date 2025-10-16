@@ -111,8 +111,10 @@ function checkCollisions() {
 function showCircle() {
   for (let i=0; i<theBallArray.length; i++) {
     let theBall = theBallArray[i];
-    newBall.r = 510*(sq(newBall.dx)+sq(newBall.dy))/(2*sq(maxSpeed))-255;
-    newBall.b = 255-225*(sq(newBall.dx)+sq(newBall.dy))/(2*sq(maxSpeed));
+    // the kinetic energy of the ball
+    let ballKE = (sq(theBall.dx)+sq(theBall.dy))/(2*sq(maxSpeed));
+    theBall.r = max(0,2*ballKE - 1)*255;
+    theBall.b = max(0,1-2*ballKE)*255;
     fill(theBall.r, theBall.g, theBall.b);
     circle(theBall.x, theBall.y, theBall.radius*2)
   }
