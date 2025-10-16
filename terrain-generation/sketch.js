@@ -1,30 +1,48 @@
 // Terrain Generation with Perlin Noise
 
 let terrain = [];
-let w = 10;
+let w = 1;
+let time = 0;
+let timeStep = 0.003;
+let x=0;
+let max_height;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  let rect = spawnRectangle(0,w,100);
-  terrain.push(rect);
+  max_height = height*0.7;
+  noStroke();
+  generateTerrain();
 }
+
+
 
 function draw() {
   background(220);
+  showRectangles();
 }
 
 function spawnRectangle(x,w,h) {
-  let rect = {
+  let rectangle = {
     x: x,
     y: height - h,
     w: w,
     h: h,
   };
-  return rect;
+  return rectangle;
 }
 
 function showRectangles() {
-  for (let rect of terrain) {
-    rect(rect.x, rect.y, rect.w, rect.h);
+  for (let rectangle of terrain) {
+    fill(255-rectangle.h/max_height*255);
+    rect(rectangle.x, rectangle.y, rectangle.w, rectangle.h);
   }
+}
+
+function generateTerrain() {
+  while (x <= width) {
+    terrain.push(spawnRectangle(x, w, noise(time)*max_height));
+    x+=w;
+    time+=timeStep;
+  }
+  
 }
