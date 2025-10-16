@@ -58,12 +58,12 @@ function bounceEdge() {
     if (theBall.x < 0 + theBall.radius || theBall.x > width - theBall.radius) {
       theBall.x = max(theBall.radius, min(theBall.x, width-theBall.radius));
       theBall.dx = theBall.dx * -1;
-      randomizeColor(theBall);
+      // randomizeColor(theBall);
     }
     if (theBall.y < 0 + theBall.radius || theBall.y > height - theBall.radius) {
       theBall.y = max(theBall.radius, min(theBall.y, height-theBall.radius));
       theBall.dy = theBall.dy * -1;
-      randomizeColor(theBall);
+      // randomizeColor(theBall);
     }
   }
 }
