@@ -117,8 +117,10 @@ function showCircle() {
     let theBall = theBallArray[i];
     // the kinetic energy of the ball
     let ballKE = (sq(theBall.dx)+sq(theBall.dy))/(2*sq(maxSpeed));
-    theBall.r = min(1,4*ballKE)*255;
-    theBall.b = max(0,1-4*ballKE)*255;
+    theBall.r = min(1,ballKE/colorDistributionMidpoint)*255;
+    theBall.b = min(1,(1-ballKE)/(1-colorDistributionMidpoint))*255;
+    theBall.g = 0.5*(1/colorDistributionMidpoint-1/(1-colorDistributionMidpoint))*ballKE-0.5*(1/colorDistributionMidpoint+1/(1-colorDistributionMidpoint))*abs(ballKE-colorDistributionMidpoint)+0.5/(1-colorDistributionMidpoint);
+    
     fill(theBall.r, theBall.g, theBall.b);
     circle(theBall.x, theBall.y, theBall.radius*2)
   }
