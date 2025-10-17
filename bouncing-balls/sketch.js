@@ -2,6 +2,8 @@ let theBallArray = [];
 let maxSpeed = 6;
 let distributionWidth = 0.5;
 let colorDistributionMidpoint;
+let boxWidth = 400;
+let boxHeight = 400;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -13,6 +15,7 @@ function setup() {
 
 function draw() {
   background(0);
+  drawBox();
   moveCircle();
   checkCollisions();
   bounceEdge();
@@ -40,9 +43,6 @@ function spawnBall(x, y) {
     g : 255,
     b : 255,
   };
-  newBall.g = 0;
-  newBall.r = 510*(sq(newBall.dx)+sq(newBall.dy))/(2*sq(maxSpeed))-255;
-  newBall.b = 255-225*(sq(newBall.dx)+sq(newBall.dy))/(2*sq(maxSpeed));
 
   theBallArray.push(newBall);
 }
@@ -55,17 +55,31 @@ function moveCircle() {
   }
 }
 
+function drawBox() {
+  color(255);
+  stroke(1000);
+  noFill();
+  rect((width-boxWidth)/2,(height-boxHeight)/2, boxWidth, boxHeight);
+  noStroke();
+  fill(255);
+}
+
 function bounceEdge() {
+  let leftEdge = (width-boxWidth)/2;
+  let rightEdge = (width+boxWidth)/2;
+  let topEdge = (height-boxHeight)/2;
+  let bottomEdge = (height+boxHeight)/2;
+
   for (let i=0; i<theBallArray.length; i++) {
     let theBall = theBallArray[i];
     //should i bounce?
-    if (theBall.x < 0 + theBall.radius || theBall.x > width - theBall.radius) {
-      theBall.x = max(theBall.radius, min(theBall.x, width-theBall.radius));
+    if (theBall.x < leftEdge+theBall.radius || theBall.x > rightEdge - theBall.radius) {
+      theBall.x = max(leftEdge+theBall.radius, min(theBall.x, rightEdge - theBall.radius));
       theBall.dx = theBall.dx * -1;
       // randomizeColor(theBall);
     }
-    if (theBall.y < 0 + theBall.radius || theBall.y > height - theBall.radius) {
-      theBall.y = max(theBall.radius, min(theBall.y, height-theBall.radius));
+    if (theBall.y < topEdge+theBall.radius || theBall.y > bottomEdge - theBall.radius) {
+      theBall.y = max(topEdge+theBall.radius, min(theBall.y, bottomEdge - theBall.radius));
       theBall.dy = theBall.dy * -1;
       // randomizeColor(theBall);
     }
@@ -120,7 +134,7 @@ function showCircle() {
     theBall.r = min(1,ballKE/colorDistributionMidpoint)*255;
     theBall.b = min(1,(1-ballKE)/(1-colorDistributionMidpoint))*255;
     theBall.g = 0.5*(1/colorDistributionMidpoint-1/(1-colorDistributionMidpoint))*ballKE-0.5*(1/colorDistributionMidpoint+1/(1-colorDistributionMidpoint))*abs(ballKE-colorDistributionMidpoint)+0.5/(1-colorDistributionMidpoint);
-    
+
     fill(theBall.r, theBall.g, theBall.b);
     circle(theBall.x, theBall.y, theBall.radius*2)
   }
