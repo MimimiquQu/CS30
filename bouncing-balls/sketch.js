@@ -1,16 +1,19 @@
 let theBallArray = [];
+let numberOfParticles;
 let maxSpeed = 6;
 let distributionWidth = 0.5;
 let colorDistributionMidpoint;
 let boxWidth = 400;
 let boxHeight = 400;
+let particleMass = 1;
+let plotDistributionPrecision = 10;
 
 function setup() {
+  colorDistributionMidpoint = (-1)*distributionWidth*log((1+exp((-1)/distributionWidth))/2);
   createCanvas(windowWidth, windowHeight);
-  spawnBall();
   noStroke();
   angleMode(DEGREES);
-  colorDistributionMidpoint = (-1)*distributionWidth*log((1+exp((-1)/distributionWidth))/2);
+  drawBox();
 }
 
 function draw() {
@@ -20,7 +23,7 @@ function draw() {
   checkCollisions();
   bounceEdge();
   showCircle();
-  // console.log(y);
+  plotValues();
 }
 
 function mousePressed() {
@@ -45,6 +48,7 @@ function spawnBall(x, y) {
   };
 
   theBallArray.push(newBall);
+  numberOfParticles = theBallArray.length;
 }
 
 function moveCircle() {
@@ -136,8 +140,39 @@ function showCircle() {
     theBall.g = 0.5*(1/colorDistributionMidpoint-1/(1-colorDistributionMidpoint))*ballKE-0.5*(1/colorDistributionMidpoint+1/(1-colorDistributionMidpoint))*abs(ballKE-colorDistributionMidpoint)+0.5/(1-colorDistributionMidpoint);
 
     fill(theBall.r, theBall.g, theBall.b);
-    circle(theBall.x, theBall.y, theBall.radius*2)
+    circle(theBall.x, theBall.y, theBall.radius*2);
   }
+}
+
+function plotValues() {
+  let sumKE = 0;
+  let sumSpeeds = 0;
+  let speedDistribution = new Array(plotDistributionPrecision);
+  let kEDistribution = new Array(plotDistributionPrecision);
+
+  // Use a single loop to calculate average v and KE, and recording in an array.
+  for (let ball of theBallArray) {
+    let v = sqrt(sq(ball.dx)+sq(ball.dy));
+    let kE = 0.5*particleMass*sq(v);
+    // add up individual speeds/KEs to calculate average
+    sumSpeeds+=v;
+    sumKE+=kE;
+    // record values
+    // take the floor of "(thisValue)/(maxValue) and multipled by plotDistributionPrecision(the number of intervals in the plot)" as "the interval (thisValue) is in" -> increment by 1
+    speedDistribution[floor(v/(sqrt(2)*maxSpeed)*plotDistributionPrecision)] ++;
+    kEDistribution[floor(kE/(particleMass*sq(maxSpeed))*plotDistributionPrecision)] ++;
+    
+  }
+  let avrKE = sumKE/numberOfParticles;
+  let avrSpeed = sumSpeeds/numberOfParticles;
+
+  textAlign(LEFT);
+  textSize(20);
+  textStyle(NORMAL);
+  textFont("Verdana");
+  fill("white");
+  text("Average Speed: "+avrSpeed.toFixed(3), width/8, height*0.8 - 50);
+  text("Average Kinetic Energy: "+avrKE.toFixed(3), width/8, height*0.8 + 50);
 }
 
 function randomizeColor(theBall) {
