@@ -6,7 +6,9 @@ let colorDistributionMidpoint;
 let boxWidth = 400;
 let boxHeight = 400;
 let particleMass = 1;
-let plotDistributionPrecision = 10;
+let plotDistributionPrecision = 20;
+let plotDisplayWidth = 300;
+let plotDisplayHeight = 200;
 
 function setup() {
   colorDistributionMidpoint = (-1)*distributionWidth*log((1+exp((-1)/distributionWidth))/2);
@@ -27,7 +29,9 @@ function draw() {
 }
 
 function mousePressed() {
-  spawnBall(mouseX, mouseY);
+  for (let i=0; i<10; i++) {
+    spawnBall(mouseX, mouseY);
+  }
 }
 
 
@@ -147,8 +151,8 @@ function showCircle() {
 function plotValues() {
   let sumKE = 0;
   let sumSpeeds = 0;
-  let speedDistribution = new Array(plotDistributionPrecision);
-  let kEDistribution = new Array(plotDistributionPrecision);
+  let speedDistribution = new Array(plotDistributionPrecision).fill(0);
+  let kEDistribution = new Array(plotDistributionPrecision).fill(0);
 
   // Use a single loop to calculate average v and KE, and recording in an array.
   for (let ball of theBallArray) {
@@ -160,23 +164,38 @@ function plotValues() {
     // record values
     // take the floor of "(thisValue)/(maxValue) and multipled by plotDistributionPrecision(the number of intervals in the plot)" as "the interval (thisValue) is in" -> increment by 1
     speedDistribution[floor(v/(sqrt(2)*maxSpeed)*plotDistributionPrecision)] ++;
+    console.log(speedDistribution);
     kEDistribution[floor(kE/(particleMass*sq(maxSpeed))*plotDistributionPrecision)] ++;
     
   }
   let avrKE = sumKE/numberOfParticles;
   let avrSpeed = sumSpeeds/numberOfParticles;
 
+  //display avr v and KE as text
   textAlign(LEFT);
   textSize(20);
   textStyle(NORMAL);
   textFont("Verdana");
   fill("white");
-  text("Average Speed: "+avrSpeed.toFixed(3), width/8, height*0.8 - 50);
-  text("Average Kinetic Energy: "+avrKE.toFixed(3), width/8, height*0.8 + 50);
+  text("Average Speed: "+avrSpeed.toFixed(3), width*0.05, height*0.8 - 50);
+  text("Average Kinetic Energy: "+avrKE.toFixed(3), width*0.05, height*0.8 + 50);
+
+  //display v,KE distribution via a graph
+  // draw rectangles with height corresponding to frequency
+  text("Speed Distribution", width*0.05, height*0.5 + 150);
+  let peakFrq = findMax(speedDistribution, 1); // call this function to find the max(numerically largest) element within the array
+  for (let i=0; i<plotDistributionPrecision; i++) {
+    rect(width*0.05+i*(plotDisplayWidth)/(plotDistributionPrecision), height*0.5+130 - speedDistribution[i]*plotDisplayHeight/peakFrq, plotDisplayWidth/plotDistributionPrecision + 1, speedDistribution[i]*plotDisplayHeight/peakFrq);
+  }
 }
 
-function randomizeColor(theBall) {
-  theBall.r = random(255);
-  theBall.g = random(255);
-  theBall.b = random(255);
+
+//function to find the max for any array, useful for a lot of applications in this project and likely future ones too
+function findMax(array, defaultValue) {
+  if (array.length===0) return NaN;
+  let maxElement = array[0];
+  for (let element of array) {
+    maxElement = max(maxElement, element);
+  }
+  return max(defaultValue, maxElement);
 }
