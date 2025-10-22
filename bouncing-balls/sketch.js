@@ -6,7 +6,7 @@ let colorDistributionMidpoint;
 let boxWidth = 400;
 let boxHeight = 400;
 let particleMass = 1;
-let plotDistributionPrecision = 20;
+let plotDistributionPrecision = 12; // how many intervals to divide the speed/KE distribution graphs into
 let plotDisplayWidth = 300;
 let plotDisplayHeight = 200;
 
@@ -163,9 +163,11 @@ function plotValues() {
     sumKE+=kE;
     // record values
     // take the floor of "(thisValue)/(maxValue) and multipled by plotDistributionPrecision(the number of intervals in the plot)" as "the interval (thisValue) is in" -> increment by 1
-    speedDistribution[floor(v/(sqrt(2)*maxSpeed)*plotDistributionPrecision)] ++;
-    console.log(speedDistribution);
-    kEDistribution[floor(kE/(particleMass*sq(maxSpeed))*plotDistributionPrecision)] ++;
+    // I set the (maxValue) for speed as as 2*maxSpeed which is actually sqrt(2)*(maximum possible initial speed of a ball), because (maximum possible initial speed of a ball) = sqrt(sq(maxSpeed)+sq(maxSpeed)) = sqrt(2)*maxSpeed, and in collisions speeds can go higher than initial speeds. 
+    // The sqrt(2) factor added on top of that is to give "buffer space" for speeds that are over the initial maximum possible speed.
+    speedDistribution[min(plotDistributionPrecision, floor(v/(2*maxSpeed)*plotDistributionPrecision))] ++;
+    // the same "buffer space" logic applies to KE as well.
+    kEDistribution[min(plotDistributionPrecision, floor(kE/(2*particleMass*sq(maxSpeed))*plotDistributionPrecision))] ++;
     
   }
   let avrKE = sumKE/numberOfParticles;
@@ -184,6 +186,8 @@ function plotValues() {
   // draw rectangles with height corresponding to frequency
   text("Speed Distribution", width*0.05, height*0.5 + 150);
   let peakFrq = findMax(speedDistribution, 1); // call this function to find the max(numerically largest) element within the array
+  // console.log(speedDistribution);
+  // console.log(peakFrq);
   for (let i=0; i<plotDistributionPrecision; i++) {
     rect(width*0.05+i*(plotDisplayWidth)/(plotDistributionPrecision), height*0.5+130 - speedDistribution[i]*plotDisplayHeight/peakFrq, plotDisplayWidth/plotDistributionPrecision + 1, speedDistribution[i]*plotDisplayHeight/peakFrq);
   }
