@@ -3,10 +3,10 @@ let numberOfParticles;
 let maxSpeed = 5;
 let distributionWidth = 0.5;
 let colorDistributionMidpoint;
-let boxWidth = 600;
-let boxHeight = 600;
+let boxWidth = 400;
+let boxHeight = 400;
 let particleMass = 1;
-let plotDistributionPrecision = 100; // how many intervals to divide the speed/KE distribution graphs into
+let plotDistributionPrecision = 50; // how many intervals to divide the speed/KE distribution graphs into
 let plotDisplayWidth = 300;
 let plotDisplayHeight = 200;
 
@@ -37,7 +37,7 @@ function mousePressed() {
 
 function spawnBall(x, y) {
   // let radius = random(25, 75);
-  let radius = 3;
+  let radius = 4;
   x = min(max(radius, x), width-radius);
   y = min(max(radius, y), height-radius);
   let newBall = {
