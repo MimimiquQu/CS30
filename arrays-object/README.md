@@ -1,0 +1,6 @@
+- This project is a physics simulation for an ideal gas in a perfectly isolated system, and plot the speed/KE distribution among the particles.
+- The speed and KE distribution plots aligns with the Boltzmann-Maxwell distribution, proving that the simulations is an accurate depiction of real-life phenomenons.
+- CLICK MOUSE to generate 40 balls (gas particles).
+- If you're computer has good performance (most likely a desktop), you can go up to around 1000-1500 balls with no trouble. At 2000 even the best devices would start to lag. For a normal laptop (like the one I'm using right now), this limit goes down to 300-500.
+- Next steps: Use better collision-detection algorithms that are, ideally, O(n) or atleast O(nlogn) (subquadratic), instead of the current dummy-looping approach that's O(n^2) -- No wonder it quickly breaks when you increase the number of balls!
+- 
