@@ -201,21 +201,21 @@ function plotValues() {
   textStyle(NORMAL);
   textFont("Verdana");
   fill("white");
-  text("Average Speed: "+avrSpeed.toFixed(3), width*0.05, height*0.8 - 50);
-  text("Average Kinetic Energy: "+avrKE.toFixed(3), width*0.05, height*0.8 + 50);
+  text("Average Speed: "+avrSpeed.toFixed(3), width*0.05, height*0.75 + 100);
+  text("Average Kinetic Energy: "+avrKE.toFixed(3), width*0.05, height*0.5-30);
 
   //display v,KE distribution via a graph
   // draw rectangles with height corresponding to frequency
-  text("Speed Distribution", width*0.05, height*0.5 + 150);
+  text("Speed Distribution", width*0.05, height*0.75 + 70);
   let peakFrq = findMax(speedDistribution, 1); // call this function to find the max(numerically largest) element within the array
   for (let i=0; i<plotDistributionPrecision; i++) {
-    rect(width*0.05+i*(plotDisplayWidth)/(plotDistributionPrecision), height*0.5+130 - speedDistribution[i]*plotDisplayHeight/peakFrq, plotDisplayWidth/plotDistributionPrecision + 1, speedDistribution[i]*plotDisplayHeight/peakFrq);
+    rect(width*0.05+i*(plotDisplayWidth)/(plotDistributionPrecision), height*0.75+45 - speedDistribution[i]*plotDisplayHeight/peakFrq, plotDisplayWidth/plotDistributionPrecision + 1, speedDistribution[i]*plotDisplayHeight/peakFrq);
   }
 
-  text("Kinetic Energy Distribution", width*0.05, height*0.5 - 100);
+  text("Kinetic Energy Distribution", width*0.05, height*0.5 - 60);
   peakFrq = findMax(kEDistribution, 1);
   for (let i=0; i<plotDistributionPrecision; i++) {
-    rect(width*0.05+i*(plotDisplayWidth)/(plotDistributionPrecision), height*0.5-120 - kEDistribution[i]*plotDisplayHeight/peakFrq, plotDisplayWidth/plotDistributionPrecision + 1, kEDistribution[i]*plotDisplayHeight/peakFrq);
+    rect(width*0.05+i*(plotDisplayWidth)/(plotDistributionPrecision), height*0.5-85 - kEDistribution[i]*plotDisplayHeight/peakFrq, plotDisplayWidth/plotDistributionPrecision + 1, kEDistribution[i]*plotDisplayHeight/peakFrq);
   }
 }
 
