@@ -138,7 +138,10 @@ function checkCollisions() {
 
         // change colors according to KE after collision
         // ballKE is the fraction of the ball's velocity to the initial maximum possible velocity (which is sqrt(2)*maxSpeed).
-        // this part is meant to 
+        // this part is meant to create a color gradient from pure blue (KE=0) to pure red (KE=max), which purple-pink-ish in the middle.
+        // Basically, it requires a mapping from [0,1] to RGB values, which is equivalent to a point in 3D space (R,G,B).
+        // The constraint is that when KE=0, (R,G,B)=(0,0,255), when KE=1, (R,G,B)=(255,0,0), and when KE=colorDistributionMidpoint, G should be at its maximum (255).
+        // With the other constraint that the function should be segments of linear functions for simplicity, I derived the following equations for R,G,B respectively. This is technically a continuous collection of 4-dimensional lines. 
         // ball 1
         let ballKE = (sq(ball1.dx)+sq(ball1.dy))/(sqrt(2)*sq(maxSpeed));
         ball1.r = min(1,ballKE/colorDistributionMidpoint)*255;
