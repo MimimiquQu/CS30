@@ -138,6 +138,7 @@ function checkCollisions() {
 
         // change colors according to KE after collision
         // ballKE is the fraction of the ball's velocity to the initial maximum possible velocity (which is sqrt(2)*maxSpeed).
+        // this part is meant to 
         // ball 1
         let ballKE = (sq(ball1.dx)+sq(ball1.dy))/(sqrt(2)*sq(maxSpeed));
         ball1.r = min(1,ballKE/colorDistributionMidpoint)*255;
