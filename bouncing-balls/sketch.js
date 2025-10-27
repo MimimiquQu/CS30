@@ -1,16 +1,17 @@
-let theBallArray = [];
+let ballArray = [];
 let numberOfParticles;
 let maxSpeed = 5;
 let distributionWidth = 0.5;
 let colorDistributionMidpoint;
-let boxWidth = 400;
-let boxHeight = 400;
+let boxWidth = 600;
+let boxHeight = 600;
 let particleMass = 1;
-let plotDistributionPrecision = 50; // how many intervals to divide the speed/KE distribution graphs into
+let plotDistributionPrecision = 30; // how many intervals to divide the speed/KE distribution graphs into
 let plotDisplayWidth = 300;
 let plotDisplayHeight = 200;
 
 function setup() {
+  // I have to define the colorDistributionMidpoint in setup() because it uses the "log" and "exp" functions which are not available until p5.js is initialized.
   colorDistributionMidpoint = (-1)*distributionWidth*log((1+exp((-1)/distributionWidth))/2);
   createCanvas(windowWidth, windowHeight);
   noStroke();
@@ -40,26 +41,32 @@ function spawnBall(x, y) {
   let radius = 4;
   x = min(max(radius, x), width-radius);
   y = min(max(radius, y), height-radius);
+  // picks a random velocity from 0 to maxSpeed and a random direction, then convert them to dx, dy via trigonometry.
+  let v = random(0, maxSpeed);
+  let dir = random(0, 360);
+  dx = v*cos(dir);
+  dy = v*sin(dir);
+
   let newBall = {
     x : x,
     y : y,
-    dx : random(-maxSpeed, maxSpeed),
-    dy : random(-maxSpeed, maxSpeed),
+    dx : dx,
+    dy : dy,
     radius : radius,
     r : 255,
     g : 255,
     b : 255,
   };
 
-  theBallArray.push(newBall);
-  numberOfParticles = theBallArray.length;
+  ballArray.push(newBall);
+  numberOfParticles = ballArray.length;
 }
 
 function moveCircle() {
-  for (let i=0; i<theBallArray.length; i++) {
-    let theBall = theBallArray[i];
-    theBall.x = theBall.x + theBall.dx;
-    theBall.y = theBall.y + theBall.dy;
+  for (let i=0; i<ballArray.length; i++) {
+    let ball = ballArray[i];
+    ball.x = ball.x + ball.dx;
+    ball.y = ball.y + ball.dy;
   }
 }
 
@@ -78,28 +85,28 @@ function bounceEdge() {
   let topEdge = (height-boxHeight)/2;
   let bottomEdge = (height+boxHeight)/2;
 
-  for (let i=0; i<theBallArray.length; i++) {
-    let theBall = theBallArray[i];
+  for (let i=0; i<ballArray.length; i++) {
+    let ball = ballArray[i];
     //should i bounce?
-    if (theBall.x < leftEdge+theBall.radius || theBall.x > rightEdge - theBall.radius) {
-      theBall.x = max(leftEdge+theBall.radius, min(theBall.x, rightEdge - theBall.radius));
-      theBall.dx = theBall.dx * -1;
-      // randomizeColor(theBall);
+    if (ball.x < leftEdge+ball.radius || ball.x > rightEdge - ball.radius) {
+      ball.x = max(leftEdge+ball.radius, min(ball.x, rightEdge - ball.radius));
+      ball.dx = ball.dx * -1;
+      // randomizeColor(ball);
     }
-    if (theBall.y < topEdge+theBall.radius || theBall.y > bottomEdge - theBall.radius) {
-      theBall.y = max(topEdge+theBall.radius, min(theBall.y, bottomEdge - theBall.radius));
-      theBall.dy = theBall.dy * -1;
-      // randomizeColor(theBall);
+    if (ball.y < topEdge+ball.radius || ball.y > bottomEdge - ball.radius) {
+      ball.y = max(topEdge+ball.radius, min(ball.y, bottomEdge - ball.radius));
+      ball.dy = ball.dy * -1;
+      // randomizeColor(ball);
     }
   }
 }
 
 // check collisions between balls
 function checkCollisions() {
-  for (let i=0; i<theBallArray.length; i++) {
-    let ball1 = theBallArray[i];
-    for (let j=i+1; j<theBallArray.length; j++) {
-      let ball2 = theBallArray[j];
+  for (let i=0; i<ballArray.length; i++) {
+    let ball1 = ballArray[i];
+    for (let j=i+1; j<ballArray.length; j++) {
+      let ball2 = ballArray[j];
       let d = dist(ball1.x, ball1.y, ball2.x, ball2.y);
       if (d <= ball1.radius + ball2.radius) {
         // define vectors
@@ -130,13 +137,14 @@ function checkCollisions() {
         ball2.dy = v2.y;
 
         // change colors according to KE after collision
+        // ballKE is the fraction of the ball's velocity to the initial maximum possible velocity (which is sqrt(2)*maxSpeed).
         // ball 1
-        let ballKE = (sq(ball1.dx)+sq(ball1.dy))/(2*sq(maxSpeed));
+        let ballKE = (sq(ball1.dx)+sq(ball1.dy))/(sqrt(2)*sq(maxSpeed));
         ball1.r = min(1,ballKE/colorDistributionMidpoint)*255;
         ball1.b = min(1,(1-ballKE)/(1-colorDistributionMidpoint))*255;
         ball1.g = 0.5*(1/colorDistributionMidpoint-1/(1-colorDistributionMidpoint))*ballKE-0.5*(1/colorDistributionMidpoint+1/(1-colorDistributionMidpoint))*abs(ballKE-colorDistributionMidpoint)+0.5/(1-colorDistributionMidpoint);
         // ball 2
-        ballKE = (sq(ball2.dx)+sq(ball2.dy))/(2*sq(maxSpeed));
+        ballKE = (sq(ball2.dx)+sq(ball2.dy))/(sqrt(2)*sq(maxSpeed));
         ball2.r = min(1,ballKE/colorDistributionMidpoint)*255;
         ball2.b = min(1,(1-ballKE)/(1-colorDistributionMidpoint))*255;
         ball2.g = 0.5*(1/colorDistributionMidpoint-1/(1-colorDistributionMidpoint))*ballKE-0.5*(1/colorDistributionMidpoint+1/(1-colorDistributionMidpoint))*abs(ballKE-colorDistributionMidpoint)+0.5/(1-colorDistributionMidpoint);
@@ -148,12 +156,12 @@ function checkCollisions() {
 
 
 function showCircle() {
-  for (let i=0; i<theBallArray.length; i++) {
-    let theBall = theBallArray[i];
+  for (let i=0; i<ballArray.length; i++) {
+    let ball = ballArray[i];
     // the kinetic energy of the ball
     
-    fill(theBall.r, theBall.g, theBall.b);
-    circle(theBall.x, theBall.y, theBall.radius*2);
+    fill(ball.r, ball.g, ball.b);
+    circle(ball.x, ball.y, ball.radius*2);
   }
 }
 
@@ -164,7 +172,7 @@ function plotValues() {
   let kEDistribution = new Array(plotDistributionPrecision).fill(0);
 
   // Use a single loop to calculate average v and KE, and recording in an array.
-  for (let ball of theBallArray) {
+  for (let ball of ballArray) {
     let v = sqrt(sq(ball.dx)+sq(ball.dy));
     let kE = 0.5*particleMass*sq(v);
     // add up individual speeds/KEs to calculate average
@@ -172,12 +180,12 @@ function plotValues() {
     sumKE+=kE;
     // record values
     // take the floor of "(thisValue)/(maxValue) and multipled by plotDistributionPrecision(the number of intervals in the plot)" as "the interval (thisValue) is in" -> increment by 1
-    // I set the (maxValue) for speed as as 2*maxSpeed which is actually sqrt(2)*(maximum possible initial speed of a ball), because (maximum possible initial speed of a ball) = sqrt(sq(maxSpeed)+sq(maxSpeed)) = sqrt(2)*maxSpeed, and in collisions speeds can go higher than initial speeds. 
-    // The sqrt(2) factor added on top of that is to give "buffer space" for speeds that are over the initial maximum possible speed.
+    // I set the (maxValue) for speed as as sqrt(2)*maxSpeed, because collisions speeds can go higher than initial speeds. 
+    // The sqrt(2) factor is intended to give "buffer space" for speeds that are over the initial maximum possible speed.
 
-    speedDistribution[min(plotDistributionPrecision-1, floor(v/(2*maxSpeed)*plotDistributionPrecision))] ++;
+    speedDistribution[min(plotDistributionPrecision-1, floor(v/(sqrt(2)*maxSpeed)*plotDistributionPrecision))] ++;
     // the same "buffer space" logic applies to KE as well.
-    kEDistribution[min(plotDistributionPrecision-1, floor(kE/(2*particleMass*sq(maxSpeed))*plotDistributionPrecision))] ++;
+    kEDistribution[min(plotDistributionPrecision-1, floor(kE/(sqrt(2)*particleMass*sq(maxSpeed))*plotDistributionPrecision))] ++;
     
   }
   let avrKE = sumKE/numberOfParticles;
