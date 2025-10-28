@@ -4,6 +4,7 @@ const CELL_SIZE = 50;
 let grid;
 let rows;
 let cols;
+let isDrawing;
 
 
 function setup() {
@@ -16,7 +17,17 @@ function setup() {
 
 function draw() {
   background(220);
+  toggleCell();
   renderGrid();
+  console.log(isDrawing);
+}
+
+function mousePressed() {
+  isDrawing = true;
+}
+
+function mouseReleased() {
+  isDrawing = false;
 }
 
 function keyPressed() {
@@ -27,6 +38,19 @@ function keyPressed() {
     grid = emptyGrid(rows, cols);
   }
 }
+
+function toggleCell() {
+ if (isDrawing) {
+  let x = floor(mouseY/CELL_SIZE);
+  let y = floor((mouseX)/CELL_SIZE);
+  if (grid[y][x] === 1) {
+    grid[y][x] = 0;
+  } else if (grid[y][x] === 0) {
+    grid[y][x] = 1;
+  }
+ }
+}
+
 
 function generateGrid(rows, cols) {
   let newGrid = [];
