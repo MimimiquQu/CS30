@@ -5,6 +5,9 @@ let grid;
 let rows;
 let cols;
 let isDrawing;
+let timePrevious = 0;
+let timeElapsed = 0;
+let interval = 1; // seconds
 
 
 function setup() {
@@ -17,18 +20,31 @@ function setup() {
 
 function draw() {
   background(220);
-  toggleCell();
   renderGrid();
-  console.log(isDrawing);
+  timeElapsed = floor(millis()/1000) - timePrevious;
+  if (timeElapsed >= interval) {
+    grid = generateGrid(rows, cols);
+    timePrevious = floor(millis()/1000); 
+  }
 }
 
-function mousePressed() {
-  isDrawing = true;
+function nextGeneration() {
+  let tmpGrid = structuredClone(grid);
+  for (let i=0; i<rows; i++) {
+    for (let j=0; j<cols; j++) {
+      let neighbors = 0;
+      for (let x=-1; x<=1; x++) {
+        for (let y=-1; y<=1; y++) {
+          if (grid[x][y] === 1) {
+            
+          }
+        }
+      }
+    }
+  }
+  grid = tmpGrid;
 }
 
-function mouseReleased() {
-  isDrawing = false;
-}
 
 function keyPressed() {
   if (key === "r") {
@@ -39,17 +55,6 @@ function keyPressed() {
   }
 }
 
-function toggleCell() {
- if (isDrawing) {
-  let x = floor(mouseY/CELL_SIZE);
-  let y = floor((mouseX)/CELL_SIZE);
-  if (grid[y][x] === 1) {
-    grid[y][x] = 0;
-  } else if (grid[y][x] === 0) {
-    grid[y][x] = 1;
-  }
- }
-}
 
 
 function generateGrid(rows, cols) {
