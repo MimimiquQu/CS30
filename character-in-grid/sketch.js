@@ -12,6 +12,13 @@ let player = {
   x: 0,
   y: 0,
 }
+let grassImg;
+let pavingImg;
+
+function preload() {
+  grassImg = loadImage("images/grass-tile.png");
+  pavingImg = loadImage("images/paving-tile.png");
+}
 
 
 function setup() {
@@ -85,13 +92,12 @@ function renderGrid() {
   for (let i=0; i<rows; i++) {
     for (let j=0; j<cols; j++) {
       if (grid[i][j] === OPEN_TILE) {
-        fill("white");
+        image(pavingImg, i*CELL_SIZE, j*CELL_SIZE, CELL_SIZE, CELL_SIZE);
       } else if (grid[i][j] === WALL_TILE) {
-        fill("black");
+        image(grassImg, i*CELL_SIZE, j*CELL_SIZE, CELL_SIZE, CELL_SIZE);
       } else if (grid[i][j] === PLAYER_TILE) {
         fill("red");
       }
-      square(i*CELL_SIZE, j*CELL_SIZE, CELL_SIZE);
     }
   }
 }
