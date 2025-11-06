@@ -1,14 +1,19 @@
+const BOX_WIDTH = 600;
+const BOX_HEIGHT = 600;
+const BALL_DIAMETER = 8
+const GRID_SIZE = 8;
+const GRID_ROWS = BOX_HEIGHT/GRID_SIZE;
+const GRID_COLS = BOX_WIDTH/GRID_SIZE;
+const PARTICLE_MASS = 1;
+
 let ballArray = [];
 let numberOfParticles;
 let maxSpeed = 5;
 let distributionWidth = 0.5;
 let colorDistributionMidpoint;
-let boxWidth = 600;
-let boxHeight = 600;
-let particleMass = 1;
 let plotDistributionPrecision = 30; // how many intervals to divide the speed/KE distribution graphs into
-let plotDisplayWidth = 300;
-let plotDisplayHeight = 200;
+let grid = [];
+
 
 function setup() {
   // I have to define the colorDistributionMidpoint in setup() because it uses the "log" and "exp" functions which are not available until p5.js is initialized.
@@ -17,6 +22,7 @@ function setup() {
   noStroke();
   angleMode(DEGREES);
   drawBox();
+  initializeGrid();
 }
 
 function draw() {
@@ -35,10 +41,20 @@ function mousePressed() {
   }
 }
 
+function initializeGrid() {
+  // grid is an 3D array. grid[i][j] contains an array of balls in cell(i,j). For example, grid[i][j] = [ballArray[1], ballArray[5], ... ]
+  for (let i=0; i<GRID_COLS; i++) {
+    grid.push([]);
+    for (let j=0; j<GRID_ROWS; j++) {
+      grid[i].push([]);
+    }
+  }
+}
+
 
 function spawnBall(x, y) {
   // let radius = random(25, 75);
-  let radius = 4;
+  let radius = BALL_DIAMETER/2;
   x = min(max(radius, x), width-radius);
   y = min(max(radius, y), height-radius);
   // picks a random velocity from 0 to maxSpeed and a random direction, then convert them to dx, dy via trigonometry.
@@ -74,16 +90,16 @@ function drawBox() {
   color(255);
   stroke(1000);
   noFill();
-  rect((width-boxWidth)/2,(height-boxHeight)/2, boxWidth, boxHeight);
+  rect((width-BOX_WIDTH)/2,(height-BOX_HEIGHT)/2, BOX_WIDTH, BOX_HEIGHT);
   noStroke();
   fill(255);
 }
 
 function bounceEdge() {
-  let leftEdge = (width-boxWidth)/2;
-  let rightEdge = (width+boxWidth)/2;
-  let topEdge = (height-boxHeight)/2;
-  let bottomEdge = (height+boxHeight)/2;
+  let leftEdge = (width-BOX_WIDTH)/2;
+  let rightEdge = (width+BOX_WIDTH)/2;
+  let topEdge = (height-BOX_HEIGHT)/2;
+  let bottomEdge = (height+BOX_HEIGHT)/2;
 
   for (let i=0; i<ballArray.length; i++) {
     let ball = ballArray[i];
@@ -101,61 +117,70 @@ function bounceEdge() {
   }
 }
 
+// improve collision detection algorithm with 2D spatial partitioning.
+function partitionBalls() {
+  // if a ball is in cell (i, j), it should be in the array grid[i][j].
+  // first, clear the grid.
+  grid.clear();
+  for (let ball of ballArray) {
+    let gridX = floor((ball.x - (width-BOX_WIDTH)/2)/GRID_SIZE);
+    let gridY = floor((ball.y - (height-BOX_HEIGHT)/2)/GRID_SIZE);
+    grid[gridX][gridY].push(ball);
+  }
+}
 // check collisions between balls
 function checkCollisions() {
-  for (let i=0; i<ballArray.length; i++) {
-    let ball1 = ballArray[i];
-    for (let j=i+1; j<ballArray.length; j++) {
-      let ball2 = ballArray[j];
-      let d = dist(ball1.x, ball1.y, ball2.x, ball2.y);
-      if (d <= ball1.radius + ball2.radius) {
-        // define vectors
-        let normal = createVector(ball2.x-ball1.x, ball2.y-ball1.y);
-        normal.normalize();
-        let v1 = createVector(ball1.dx, ball1.dy);
-        let v2 = createVector(ball2.dx, ball2.dy);
-        let v1Dot = v1.dot(normal);
-        let v2Dot = v2.dot(normal);
-        // correct overlap
-        let overlap = ball1.radius+ball2.radius-d;
-        ball1.x -= overlap/2*normal.x;
-        ball1.y -= overlap/2*normal.y;
-        ball2.x += overlap/2*normal.x;
-        ball2.y += overlap/2*normal.y;
-        bounceEdge();
-        // collides perfectly elastically, along the normal
-        let v1Change = normal.copy();
-        let v2Change = normal.copy();
-        // assume that the masses of the balls are all the same, then they simply "exchange" velocities
-        v1Change.mult(v2Dot-v1Dot);
-        v2Change.mult(v1Dot-v2Dot);
-        v1.add(v1Change);
-        v2.add(v2Change);
-        ball1.dx = v1.x;
-        ball1.dy = v1.y;
-        ball2.dx = v2.x;
-        ball2.dy = v2.y;
 
-        // change colors according to KE after collision
-        // ballKE is the fraction of the ball's velocity to the initial maximum possible velocity (which is sqrt(2)*maxSpeed).
-        // this part is meant to create a color gradient from pure blue (KE=0) to pure red (KE=max), which purple-pink-ish in the middle.
-        // Basically, it requires a mapping from [0,1] to RGB values, which is equivalent to a point in 3D space (R,G,B).
-        // The constraint is that when KE=0, (R,G,B)=(0,0,255), when KE=1, (R,G,B)=(255,0,0), and when KE=colorDistributionMidpoint, G should be at its maximum (255).
-        // With the other constraint that the function should be segments of linear functions for simplicity, I derived the following equations for R,G,B respectively. This is technically a continuous collection of 4-dimensional lines. 
-        // ball 1
-        let ballKE = (sq(ball1.dx)+sq(ball1.dy))/(sqrt(2)*sq(maxSpeed));
-        ball1.r = min(1,ballKE/colorDistributionMidpoint)*255;
-        ball1.b = min(1,(1-ballKE)/(1-colorDistributionMidpoint))*255;
-        ball1.g = 0.5*(1/colorDistributionMidpoint-1/(1-colorDistributionMidpoint))*ballKE-0.5*(1/colorDistributionMidpoint+1/(1-colorDistributionMidpoint))*abs(ballKE-colorDistributionMidpoint)+0.5/(1-colorDistributionMidpoint);
-        // ball 2
-        ballKE = (sq(ball2.dx)+sq(ball2.dy))/(sqrt(2)*sq(maxSpeed));
-        ball2.r = min(1,ballKE/colorDistributionMidpoint)*255;
-        ball2.b = min(1,(1-ballKE)/(1-colorDistributionMidpoint))*255;
-        ball2.g = 0.5*(1/colorDistributionMidpoint-1/(1-colorDistributionMidpoint))*ballKE-0.5*(1/colorDistributionMidpoint+1/(1-colorDistributionMidpoint))*abs(ballKE-colorDistributionMidpoint)+0.5/(1-colorDistributionMidpoint);
-       
-      }
-    }
+  let d = dist(ball1.x, ball1.y, ball2.x, ball2.y);
+  if (d <= ball1.radius + ball2.radius) {
+    collide(ball1, ball2);
   }
+}
+
+function collide(ball1, ball2) {
+  // define vectors
+  let normal = createVector(ball2.x-ball1.x, ball2.y-ball1.y);
+  normal.normalize();
+  let v1 = createVector(ball1.dx, ball1.dy);
+  let v2 = createVector(ball2.dx, ball2.dy);
+  let v1Dot = v1.dot(normal);
+  let v2Dot = v2.dot(normal);
+  // correct overlap
+  let overlap = ball1.radius+ball2.radius-d;
+  ball1.x -= overlap/2*normal.x;
+  ball1.y -= overlap/2*normal.y;
+  ball2.x += overlap/2*normal.x;
+  ball2.y += overlap/2*normal.y;
+  bounceEdge();
+  // collides perfectly elastically, along the normal
+  let v1Change = normal.copy();
+  let v2Change = normal.copy();
+  // assume that the masses of the balls are all the same, then they simply "exchange" velocities
+  v1Change.mult(v2Dot-v1Dot);
+  v2Change.mult(v1Dot-v2Dot);
+  v1.add(v1Change);
+  v2.add(v2Change);
+  ball1.dx = v1.x;
+  ball1.dy = v1.y;
+  ball2.dx = v2.x;
+  ball2.dy = v2.y;
+
+  // change colors according to KE after collision
+  // ballKE is the fraction of the ball's velocity to the initial maximum possible velocity (which is sqrt(2)*maxSpeed).
+  // this part is meant to create a color gradient from pure blue (KE=0) to pure red (KE=max), which purple-pink-ish in the middle.
+  // Basically, it requires a mapping from [0,1] to RGB values, which is equivalent to a point in 3D space (R,G,B).
+  // The constraint is that when KE=0, (R,G,B)=(0,0,255), when KE=1, (R,G,B)=(255,0,0), and when KE=colorDistributionMidpoint, G should be at its maximum (255).
+  // With the other constraint that the function should be segments of linear functions for simplicity, I derived the following equations for R,G,B respectively. This is technically a continuous collection of 4-dimensional lines. 
+  // ball 1
+  let ballKE = (sq(ball1.dx)+sq(ball1.dy))/(sqrt(2)*sq(maxSpeed));
+  ball1.r = min(1,ballKE/colorDistributionMidpoint)*255;
+  ball1.b = min(1,(1-ballKE)/(1-colorDistributionMidpoint))*255;
+  ball1.g = 0.5*(1/colorDistributionMidpoint-1/(1-colorDistributionMidpoint))*ballKE-0.5*(1/colorDistributionMidpoint+1/(1-colorDistributionMidpoint))*abs(ballKE-colorDistributionMidpoint)+0.5/(1-colorDistributionMidpoint);
+  // ball 2
+  ballKE = (sq(ball2.dx)+sq(ball2.dy))/(sqrt(2)*sq(maxSpeed));
+  ball2.r = min(1,ballKE/colorDistributionMidpoint)*255;
+  ball2.b = min(1,(1-ballKE)/(1-colorDistributionMidpoint))*255;
+  ball2.g = 0.5*(1/colorDistributionMidpoint-1/(1-colorDistributionMidpoint))*ballKE-0.5*(1/colorDistributionMidpoint+1/(1-colorDistributionMidpoint))*abs(ballKE-colorDistributionMidpoint)+0.5/(1-colorDistributionMidpoint);
 }
 
 
