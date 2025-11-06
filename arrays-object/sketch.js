@@ -121,7 +121,11 @@ function bounceEdge() {
 function partitionBalls() {
   // if a ball is in cell (i, j), it should be in the array grid[i][j].
   // first, clear the grid.
-  grid.clear();
+  for (let row of grid) {
+    for (let col of row) {
+      col.clear();
+    }
+  }
   for (let ball of ballArray) {
     let gridX = floor((ball.x - (width-BOX_WIDTH)/2)/GRID_SIZE);
     let gridY = floor((ball.y - (height-BOX_HEIGHT)/2)/GRID_SIZE);
