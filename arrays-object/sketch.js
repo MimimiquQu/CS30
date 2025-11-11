@@ -1,14 +1,16 @@
 const BOX_WIDTH = 600;
 const BOX_HEIGHT = 600;
-const BALL_DIAMETER = 8
+const BALL_DIAMETER = 6;
 const GRID_SIZE = 8;
 const GRID_ROWS = BOX_HEIGHT/GRID_SIZE;
 const GRID_COLS = BOX_WIDTH/GRID_SIZE;
 const PARTICLE_MASS = 1;
+const PLOT_DISPLAY_WIDTH = 200;
+const PLOT_DISPLAY_HEIGHT = 100;
 
 let ballArray = [];
 let numberOfParticles;
-let maxSpeed = 5;
+let maxSpeed = 3;
 let distributionWidth = 0.5;
 let colorDistributionMidpoint;
 let plotDistributionPrecision = 30; // how many intervals to divide the speed/KE distribution graphs into
@@ -29,6 +31,7 @@ function draw() {
   background(0);
   drawBox();
   moveCircle();
+  partitionBalls();
   checkCollisions();
   bounceEdge();
   showCircle();
@@ -36,16 +39,16 @@ function draw() {
 }
 
 function mousePressed() {
-  for (let i=0; i<40; i++) {
+  for (let i=0; i<25; i++) {
     spawnBall(mouseX, mouseY);
   }
 }
 
 function initializeGrid() {
   // grid is an 3D array. grid[i][j] contains an array of balls in cell(i,j). For example, grid[i][j] = [ballArray[1], ballArray[5], ... ]
-  for (let i=0; i<GRID_COLS; i++) {
+  for (let i=0; i<GRID_ROWS; i++) {
     grid.push([]);
-    for (let j=0; j<GRID_ROWS; j++) {
+    for (let j=0; j<GRID_COLS; j++) {
       grid[i].push([]);
     }
   }
@@ -57,7 +60,7 @@ function spawnBall(x, y) {
   let radius = BALL_DIAMETER/2;
   x = min(max(radius, x), width-radius);
   y = min(max(radius, y), height-radius);
-  // picks a random velocity from 0 to maxSpeed and a random direction, then convert them to dx, dy via trigonometry.
+  // picks a random speed from 0 to maxSpeed and a random direction, then convert them to dx, dy via trigonometry.
   let v = random(0, maxSpeed);
   let dir = random(0, 360);
   dx = v*cos(dir);
@@ -123,25 +126,49 @@ function partitionBalls() {
   // first, clear the grid.
   for (let row of grid) {
     for (let col of row) {
-      col.clear();
+      col.length = 0;
     }
   }
+  // then, assign each ball to its correspoonding cell.
   for (let ball of ballArray) {
-    let gridX = floor((ball.x - (width-BOX_WIDTH)/2)/GRID_SIZE);
-    let gridY = floor((ball.y - (height-BOX_HEIGHT)/2)/GRID_SIZE);
+    let gridX = max(0, min(floor((ball.x - (width-BOX_WIDTH)/2)/GRID_SIZE), GRID_ROWS-1));
+    let gridY = max(0, min(floor((ball.y - (height-BOX_HEIGHT)/2)/GRID_SIZE), GRID_COLS-1));
     grid[gridX][gridY].push(ball);
   }
 }
+
 // check collisions between balls
 function checkCollisions() {
+  for (let i=0; i<GRID_ROWS; i++) {
+    for (let j=0; j<GRID_COLS; j++) {
+      let cell = grid[i][j];
+      // add the neighboring cells' balls into the CELL array for collision checking
+      if (j<GRID_COLS-1) cell = cell.concat(grid[i][j+1]);
+      if (j>0) cell = cell.concat(grid[i][j-1]);
+      if (i<GRID_ROWS-1) cell = cell.concat(grid[i+1][j]);
+      if (i>0) cell = cell.concat(grid[i-1][j]); 
+      if (i<GRID_ROWS-1 && j<GRID_COLS-1) cell = cell.concat(grid[i+1][j+1]);
+      if (i>0 && j>0) cell = cell.concat(grid[i-1][j-1]);
+      if (i<GRID_ROWS-1 && j>0) cell = cell.concat(grid[i+1][j-1]);
+      if (i>0 && j<GRID_COLS-1) cell = cell.concat(grid[i-1][j+1]);
 
-  let d = dist(ball1.x, ball1.y, ball2.x, ball2.y);
-  if (d <= ball1.radius + ball2.radius) {
-    collide(ball1, ball2);
+      // naive collision detection WITHIN the merged Cell array
+      for (let n=0; n<cell.length; n++) {
+        let ball1 = cell[n];
+        for (let m=n+1; m<cell.length; m++) {
+          let ball2 = cell[m];
+          let d = dist(ball1.x, ball1.y, ball2.x, ball2.y);
+          if (d <= ball1.radius + ball2.radius) {
+            collide(ball1, ball2, d);
+          }
+        }
+      }
+    }
   }
 }
 
-function collide(ball1, ball2) {
+// colliding two balls
+function collide(ball1, ball2, d) {
   // define vectors
   let normal = createVector(ball2.x-ball1.x, ball2.y-ball1.y);
   normal.normalize();
@@ -207,7 +234,7 @@ function plotValues() {
   // Use a single loop to calculate average v and KE, and recording in an array.
   for (let ball of ballArray) {
     let v = sqrt(sq(ball.dx)+sq(ball.dy));
-    let kE = 0.5*particleMass*sq(v);
+    let kE = 0.5*PARTICLE_MASS*sq(v);
     // add up individual speeds/KEs to calculate average
     sumSpeeds+=v;
     sumKE+=kE;
@@ -218,7 +245,7 @@ function plotValues() {
 
     speedDistribution[min(plotDistributionPrecision-1, floor(v/(sqrt(2)*maxSpeed)*plotDistributionPrecision))] ++;
     // the same "buffer space" logic applies to KE as well.
-    kEDistribution[min(plotDistributionPrecision-1, floor(kE/(sqrt(2)*particleMass*sq(maxSpeed))*plotDistributionPrecision))] ++;
+    kEDistribution[min(plotDistributionPrecision-1, floor(kE/(sqrt(2)*PARTICLE_MASS*sq(maxSpeed))*plotDistributionPrecision))] ++;
     
   }
   let avrKE = sumKE/numberOfParticles;
@@ -238,13 +265,13 @@ function plotValues() {
   text("Speed Distribution", width*0.05, height*0.75 + 70);
   let peakFrq = findMax(speedDistribution, 1); // call this function to find the max(numerically largest) element within the array
   for (let i=0; i<plotDistributionPrecision; i++) {
-    rect(width*0.05+i*(plotDisplayWidth)/(plotDistributionPrecision), height*0.75+45 - speedDistribution[i]*plotDisplayHeight/peakFrq, plotDisplayWidth/plotDistributionPrecision + 1, speedDistribution[i]*plotDisplayHeight/peakFrq);
+    rect(width*0.05+i*(PLOT_DISPLAY_WIDTH)/(plotDistributionPrecision), height*0.75+45 - speedDistribution[i]*PLOT_DISPLAY_HEIGHT/peakFrq, PLOT_DISPLAY_WIDTH/plotDistributionPrecision + 1, speedDistribution[i]*PLOT_DISPLAY_HEIGHT/peakFrq);
   }
 
   text("Kinetic Energy Distribution", width*0.05, height*0.5 - 60);
   peakFrq = findMax(kEDistribution, 1);
   for (let i=0; i<plotDistributionPrecision; i++) {
-    rect(width*0.05+i*(plotDisplayWidth)/(plotDistributionPrecision), height*0.5-85 - kEDistribution[i]*plotDisplayHeight/peakFrq, plotDisplayWidth/plotDistributionPrecision + 1, kEDistribution[i]*plotDisplayHeight/peakFrq);
+    rect(width*0.05+i*(PLOT_DISPLAY_WIDTH)/(plotDistributionPrecision), height*0.5-85 - kEDistribution[i]*PLOT_DISPLAY_HEIGHT/peakFrq, PLOT_DISPLAY_WIDTH/plotDistributionPrecision + 1, kEDistribution[i]*PLOT_DISPLAY_HEIGHT/peakFrq);
   }
 }
 
