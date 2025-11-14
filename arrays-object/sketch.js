@@ -1,7 +1,11 @@
 const BOX_WIDTH = 600;
 const BOX_HEIGHT = 600;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 const BALL_DIAMETER = 6;
+=======
+const BALL_DIAMETER = 2;
+>>>>>>> Stashed changes
 =======
 const BALL_DIAMETER = 2;
 >>>>>>> Stashed changes
@@ -10,12 +14,20 @@ const GRID_ROWS = BOX_HEIGHT/GRID_SIZE;
 const GRID_COLS = BOX_WIDTH/GRID_SIZE;
 const PARTICLE_MASS = 1;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 const PLOT_DISPLAY_WIDTH = 200;
 const PLOT_DISPLAY_HEIGHT = 100;
 
 let ballArray = [];
 let numberOfParticles;
 let maxSpeed = 3;
+=======
+const SPAWNS_PER_CLICK = 50;
+
+let ballArray = [];
+let numberOfParticles;
+let maxSpeed = 0.4;
+>>>>>>> Stashed changes
 =======
 const SPAWNS_PER_CLICK = 50;
 
@@ -54,8 +66,13 @@ function draw() {
 
 function mousePressed() {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   for (let i=0; i<25; i++) {
     spawnBall(mouseX, mouseY);
+=======
+  for (let i=0; i<SPAWNS_PER_CLICK; i++) {
+    spawnBall(mouseX, mouseY;
+>>>>>>> Stashed changes
 =======
   for (let i=0; i<SPAWNS_PER_CLICK; i++) {
     spawnBall(mouseX, mouseY;
@@ -146,7 +163,11 @@ function partitionBalls() {
   for (let row of grid) {
     for (let col of row) {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       col.length = 0;
+=======
+      col.length = 0; // clear the array
+>>>>>>> Stashed changes
 =======
       col.length = 0; // clear the array
 >>>>>>> Stashed changes
@@ -155,8 +176,13 @@ function partitionBalls() {
   // then, assign each ball to its correspoonding cell.
   for (let ball of ballArray) {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     let gridX = max(0, min(floor((ball.x - (width-BOX_WIDTH)/2)/GRID_SIZE), GRID_ROWS-1));
     let gridY = max(0, min(floor((ball.y - (height-BOX_HEIGHT)/2)/GRID_SIZE), GRID_COLS-1));
+=======
+    let gridX = max(min(floor((ball.x - (width-BOX_WIDTH)/2)/GRID_SIZE), GRID_COLS-1), 0);
+    let gridY = max(min(floor((ball.y - (height-BOX_HEIGHT)/2)/GRID_SIZE), GRID_ROWS-1), 0);
+>>>>>>> Stashed changes
 =======
     let gridX = max(min(floor((ball.x - (width-BOX_WIDTH)/2)/GRID_SIZE), GRID_COLS-1), 0);
     let gridY = max(min(floor((ball.y - (height-BOX_HEIGHT)/2)/GRID_SIZE), GRID_ROWS-1), 0);
@@ -170,6 +196,7 @@ function checkCollisions() {
   for (let i=0; i<GRID_ROWS; i++) {
     for (let j=0; j<GRID_COLS; j++) {
       let cell = grid[i][j];
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       // add the neighboring cells' balls into the CELL array for collision checking
       if (j<GRID_COLS-1) cell = cell.concat(grid[i][j+1]);
@@ -198,12 +225,25 @@ function checkCollisions() {
       if (i<GRID_ROWS-1 && j<GRID_COLS-1) cell = cell.concat(grid[i+1][j+1]);
       if (i>0 && j>0) cell = cell.concat(grid[i-1][j-1]);
 
+=======
+      // merge neighboring cells to be checked together.
+      if (i<GRID_ROWS-1) cell = cell.concat(grid[i+1][j]);
+      if (j<GRID_COLS-1) cell = cell.concat(grid[i][j+1]);
+      if (i>0) cell = cell.concat(grid[i-1][j]);
+      if (j>0) cell = cell.concat(grid[i][j-1]);
+      if (i<GRID_ROWS-1 && j<GRID_COLS-1) cell = cell.concat(grid[i+1][j+1]);
+      if (i>0 && j>0) cell = cell.concat(grid[i-1][j-1]);
+
+>>>>>>> Stashed changes
       // check collisions between balls in the same cell
       for (let m=0; m<cell.length; m++) {
         for (let n=m+1; n<cell.length; n++) {
           let d = dist(cell[m].x, cell[m].y, cell[n].x, cell[n].y);
           if (d <= cell[m].radius + cell[n].radius) {
             collide(cell[m], cell[n], d);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
           }
         }
@@ -213,7 +253,10 @@ function checkCollisions() {
 }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // colliding two balls
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 function collide(ball1, ball2, d) {
