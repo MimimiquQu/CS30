@@ -12,6 +12,7 @@
 - [Game of Life](game-of-life)
 - [Fireworks OOP](fireworks-oop)
 - [Nodes OOP](nodes-oop)
+- [OOP Inheritance](oop-inheritance)
 
 ## Assignments
 - [Interactive Scene](interactive-scene)
