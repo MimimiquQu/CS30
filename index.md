@@ -14,6 +14,7 @@
 - [Nodes OOP](nodes-oop)
 - [OOP Inheritance](oop-inheritance)
 - [Shape Inheritance OOP](shape-inheritance-oop)
+- [Collision Detection](collision-detection)
 
 ## Assignments
 - [Interactive Scene](interactive-scene)
