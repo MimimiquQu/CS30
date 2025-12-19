@@ -15,6 +15,7 @@
 - [OOP Inheritance](oop-inheritance)
 - [Shape Inheritance OOP](shape-inheritance-oop)
 - [Collision Detection](collision-detection)
+- [Sierpinski Triangle](sierpinski-triangle)
 
 ## Assignments
 - [Interactive Scene](interactive-scene)
